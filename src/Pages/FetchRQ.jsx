@@ -5,17 +5,20 @@ export const FetchRQ = () => {
   const getPostsData = async () => {
     try {
       const res = await fetchPosts();
-      return res.status == 200 ? res.data : [];
+      return res.status == 200 && res.data
     } catch (error) {
       console.log(error);
-      return [];
     }
   };
 
-  const {data} = useQuery({
+  const { data, isPending, isError, error } = useQuery({
     queryKey: ["posts"],
     queryFn: getPostsData,
   });
+
+  if (isPending) return <h1>...loading</h1>;
+
+  if (isError) return <h1>...failed to fetch posts</h1>;
 
   return (
     <>
