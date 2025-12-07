@@ -14,6 +14,10 @@ export const FetchRQ = () => {
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["posts"],
     queryFn: getPostsData,
+    // gcTime: 1000 // for changing the cached default time of 5 min 
+    staleTime : 10000 
+    // staleTime -> option which determines how long the fetched data is to be considered fresh before 
+    // it is refetched. So that within this time a new request is not sent if the client hits the API again
   });
 
   if (isPending) return <h1>...loading</h1>;
