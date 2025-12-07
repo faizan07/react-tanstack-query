@@ -7,6 +7,7 @@ import { MainLayout } from "./components/Layout/MainLayout";
 import { Home } from "./Pages/Home";
 import { FetchOld } from "./Pages/FetchOld";
 import { FetchRQ } from "./Pages/FetchRQ";
+import { FetchRQIndividualPost } from "./components/UI/FetchRQIndividualPost";
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: "/rq",
         element: <FetchRQ />
+      },
+      {
+        path: "/rq/:rqid",
+        element: <FetchRQIndividualPost />
       }
     ],
   },
