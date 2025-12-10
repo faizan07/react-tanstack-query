@@ -1,28 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchPosts } from "../API/api";
 import { NavLink, useParams } from "react-router-dom";
+import { useState } from "react";
 
 export const FetchRQ = () => {
-  
-  const getPostsData = async () => {
+  const [page, setPage] = useState(0);
+
+  const getPostsData = async (page) => {
     try {
-      const res = await fetchPosts();
-      return res.status == 200 && res.data
+      const res = await fetchPosts(page);
+      return res.status == 200 && res.data;
     } catch (error) {
       console.log(error);
     }
   };
 
   const { data, isPending, isError, error } = useQuery({
-    queryKey: ["posts"],
-    queryFn: getPostsData,
-    // gcTime: 1000 // for changing the cached default time of 5 min 
-    staleTime : 10000, 
-    // staleTime -> option which determines how long the fetched data is to be considered fresh before 
+    queryKey: ["posts", page],
+    queryFn: () => getPostsData(page),
+    // gcTime: 1000 // for changing the cached default time of 5 min
+    staleTime: 10000,
+    // staleTime -> option which determines how long the fetched data is to be considered fresh before
     // it is refetched. So that within this time a new request is not sent if the client hits the API again,
-    refetchInterval : 2000, // this is used for Polling, i.e. every 2 sec network call is made automatically
-    refetchIntervalInBackground : true // Polling is done even when user is in different tab
-  }); 
+    refetchInterval: 2000, // this is used for Polling, i.e. every 2 sec network call is made automatically
+    refetchIntervalInBackground: true, // Polling is done even when user is in different tab
+    placeholderData: keepPreviousData,
+  });
 
   if (isPending) return <h1>...loading</h1>;
 
@@ -38,14 +41,24 @@ export const FetchRQ = () => {
             return (
               <li key={id}>
                 <NavLink to={`/rq/${id}`}>
-                <p>{userId}</p>
-                <p>{title}</p>
+                  <p>{userId}</p>
+                  <p>{title}</p>
                 </NavLink>
                 <p>{body}</p>
               </li>
             );
           })}
         </ul>
+        <div className="pagination-section container">
+          <button
+            disabled={page === 0 ? true : false}
+            onClick={() => setPage((prev) => prev - 1)}
+          >
+            Previous
+          </button>
+          <h2>{page}</h2>
+          <button onClick={() => setPage((prev) => prev + 1)}>Next</button>
+        </div>
       </div>
     </>
   );
