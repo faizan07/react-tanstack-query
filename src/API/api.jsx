@@ -17,3 +17,13 @@ export const fetchIndividualPost = async (id) => {
     return {};
   }
 };
+
+export const deleteIndividualPost = async (id) => {
+  try {
+    const res = await api.delete(`/posts/${id}`);
+    return res.status === 200 ? true : false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};

@@ -1,10 +1,13 @@
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { fetchPosts } from "../API/api";
+import { useQuery, keepPreviousData, useMutation, useQueryClient, QueryClient } from "@tanstack/react-query";
+import { fetchPosts, deleteIndividualPost } from "../API/api";
 import { NavLink, useParams } from "react-router-dom";
 import { useState } from "react";
 
 export const FetchRQ = () => {
   const [page, setPage] = useState(0);
+
+  //this is used for interacting with tanstack query cache
+  const queryClient = useQueryClient()
 
   const getPostsData = async (page) => {
     try {
@@ -24,8 +27,20 @@ export const FetchRQ = () => {
     // it is refetched. So that within this time a new request is not sent if the client hits the API again,
     refetchInterval: 2000, // this is used for Polling, i.e. every 2 sec network call is made automatically
     refetchIntervalInBackground: true, // Polling is done even when user is in different tab
-    placeholderData: keepPreviousData,
+    placeholderData: keepPreviousData, //Till the time the new data comes, the previous data is displayed
   });
+
+  //mutation function to delete a post
+  const deleteMutation = useMutation(
+    {
+      mutationFn: (id) => deleteIndividualPost(id),
+      onSuccess: (data, id) => {
+        queryClient.setQueryData(["posts", page], (currentElem) => {
+          return currentElem.filter((post) => post.id !== id)
+        })
+      }
+    }
+  )
 
   if (isPending) return <h1>...loading</h1>;
 
@@ -45,6 +60,9 @@ export const FetchRQ = () => {
                   <p>{title}</p>
                 </NavLink>
                 <p>{body}</p>
+                {/* when we run the mutate() func then the func inside the useMutation query i.e. mutationFn is called */}
+                {/* This mutate() func is used to execute mutation in tanstack query */}
+                <button onClick={() => deleteMutation.mutate(id)}>Delete</button>
               </li>
             );
           })}
