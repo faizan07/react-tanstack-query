@@ -27,3 +27,13 @@ export const deleteIndividualPost = async (id) => {
     return false;
   }
 };
+
+export const updateIndividualPost = async (id) => {
+  try {
+    const res = await api.patch(`/posts/${id}`, { title: 'This is an updated title' });
+    return res.status === 200 ? res.data : {};
+  } catch (error) {
+    console.log(error);
+    return {};
+  }
+};

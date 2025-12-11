@@ -1,5 +1,5 @@
 import { useQuery, keepPreviousData, useMutation, useQueryClient, QueryClient } from "@tanstack/react-query";
-import { fetchPosts, deleteIndividualPost } from "../API/api";
+import { fetchPosts, deleteIndividualPost, updateIndividualPost } from "../API/api";
 import { NavLink, useParams } from "react-router-dom";
 import { useState } from "react";
 
@@ -35,12 +35,24 @@ export const FetchRQ = () => {
     {
       mutationFn: (id) => deleteIndividualPost(id),
       onSuccess: (data, id) => {
-        queryClient.setQueryData(["posts", page], (currentElem) => {
-          return currentElem.filter((post) => post.id !== id)
+        queryClient.setQueryData(["posts", page], (allPost) => {
+          return allPost.filter((post) => post.id !== id)
         })
       }
     }
   )
+
+  const updateMutation = useMutation({
+    mutationFn: (id) => updateIndividualPost(id),
+    onSuccess: (apiData, postId) => {
+      console.log(apiData, postId) //apiData is the specific post which got updated
+      queryClient.setQueryData(['posts', page], (allPost) => { //allPost is the array of all posts
+        return allPost?.map((curPost) => {
+          return curPost.id === postId ? {...curPost, title: apiData.title} : curPost
+        })
+      })
+    }
+  })
 
   if (isPending) return <h1>...loading</h1>;
 
@@ -63,6 +75,7 @@ export const FetchRQ = () => {
                 {/* when we run the mutate() func then the func inside the useMutation query i.e. mutationFn is called */}
                 {/* This mutate() func is used to execute mutation in tanstack query */}
                 <button onClick={() => deleteMutation.mutate(id)}>Delete</button>
+                <button onClick={() => updateMutation.mutate(id)}>Update</button>
               </li>
             );
           })}
